@@ -1,0 +1,133 @@
+import os
+
+files = {
+    "app/src/main/java/com/flowclock/widget/FlowClockWidget.kt": """package com.flowclock.widget
+
+import android.appwidget.AppWidgetManager
+import android.content.Context
+import android.graphics.*
+import android.os.Bundle
+import android.widget.RemoteViews
+import androidx.glance.GlanceId
+import androidx.glance.appwidget.GlanceAppWidget
+import androidx.glance.appwidget.GlanceAppWidgetReceiver
+import androidx.glance.appwidget.provideContent
+import androidx.compose.runtime.Composable
+import androidx.glance.GlanceModifier
+import androidx.glance.layout.*
+import androidx.glance.text.Text
+import androidx.glance.text.TextStyle
+import androidx.compose.ui.graphics.Color
+import java.util.Calendar
+
+class FlowClockWidget : GlanceAppWidget() {
+
+    override suspend fun provideGlance(context: Context, id: GlanceId) {
+        provideContent {
+            FlowClockContent()
+        }
+    }
+
+    @Composable
+    fun FlowClockContent() {
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Flow Clock Active",
+                style = TextStyle(color = androidx.glance.unit.ColorProvider(Color.White))
+            )
+        }
+    }
+}
+
+class FlowClockWidgetReceiver : GlanceAppWidgetReceiver() {
+    override val glanceAppWidget: GlanceAppWidget = FlowClockWidget()
+}
+""",
+
+    "app/src/main/AndroidManifest.xml": """<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.flowclock.widget">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Flow Clock"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+
+        <receiver
+            android:name=".FlowClockWidgetReceiver"
+            android:exported="true"
+            android:label="Flow Clock">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/flow_clock_widget_info" />
+        </receiver>
+
+    </application>
+
+</manifest>
+""",
+
+    "app/src/main/res/xml/flow_clock_widget_info.xml": """<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:minWidth="180dp"
+    android:minHeight="180dp"
+    android:targetCellWidth="3"
+    android:targetCellHeight="2"
+    android:updatePeriodMillis="1000"
+    android:resizeMode="horizontal|vertical"
+    android:widgetCategory="home_screen|keyguard"
+    android:description="@string/widget_description">
+</appwidget-provider>
+""",
+
+    "app/build.gradle.kts": """plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+}
+
+android {
+    namespace = "com.flowclock.widget"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.flowclock.widget"
+        minSdk = 31
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
+    }
+}
+
+dependencies {
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.glance:glance-appwidget:1.1.0")
+    implementation("androidx.glance:glance-material3:1.1.0")
+}
+"""
+}
+
+for path, content in files.items():
+    folder = os.path.dirname(path)
+    if folder and not os.path.exists(folder):
+        os.makedirs(folder)
+    with open(path, "w") as f:
+        f.write(content)
+
+print("✅ All Flow Clock files generated successfully!")
